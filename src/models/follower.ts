@@ -1,7 +1,7 @@
 import { Schema, model, Document } from "mongoose";
 import { IUser } from "./user";
 
-interface IFollower extends Document {
+export interface IFollower extends Document {
     followerId: IUser["_id"];
     followingId: IUser["_id"];
 }
@@ -23,4 +23,4 @@ const followerSchema = new Schema(
     versionKey: false,
   });
 
-export default model<IFollower>("Tweet", followerSchema);
+export default model<IFollower>("Follower", followerSchema);

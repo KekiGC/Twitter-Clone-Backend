@@ -20,10 +20,15 @@ const tweetSchema = new mongoose_1.Schema({
         ref: "Tweet",
         default: null,
     },
-    image: {
+    attachment: {
         type: String,
         default: null,
     },
+    // likes:{
+    //   type: Schema.Types.ObjectId,
+    //   ref: "Like",
+    //   default: null,
+    // }
 }, {
     versionKey: false,
     timestamps: true,

@@ -1,12 +1,14 @@
 import { Schema, model, Document } from "mongoose";
 import { IUser } from "./user";
+import { ILike } from "./like"
 
 export interface ITweet extends Document {
   content: string;
   userId: IUser["_id"];
   isComment: boolean;
   parentTweetId: ITweet["_id"] | null;
-  image: string | null;
+  attachment: string | null;
+  // likes: ILike["_id"] | null;
 }
 
 const tweetSchema = new Schema<ITweet>(
@@ -29,10 +31,15 @@ const tweetSchema = new Schema<ITweet>(
       ref: "Tweet",
       default: null,
     },
-    image: {
+    attachment: {
       type: String,
       default: null,
     },
+    // likes:{
+    //   type: Schema.Types.ObjectId,
+    //   ref: "Like",
+    //   default: null,
+    // }
   },
   {
     versionKey: false,

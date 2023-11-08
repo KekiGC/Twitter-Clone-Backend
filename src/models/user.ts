@@ -4,10 +4,14 @@ import bcrypt from 'bcrypt'
 export interface IUser extends Document{
     email: string,
     username: string,
+    handle: string,
     password: string;
     name: string;
     lastname: string;
-    comparePassword: (password: string) => Promise <boolean>
+    bio: string | null;
+    profileImg: string | null;
+    comparePassword: (password: string) => Promise <boolean>;
+    editProfile: (username: string, bio: string) => Promise<void>;
 }
 
 const userSchema = new Schema({
@@ -19,6 +23,12 @@ const userSchema = new Schema({
         trim: true
     },
     username:{
+        type: String,
+        unique: true,
+        required: true,
+        trim: true
+    },
+    handle:{
         type: String,
         unique: true,
         required: true,
@@ -36,6 +46,16 @@ const userSchema = new Schema({
     lastname:{
         type: String,
         required: true,
+        trim: true
+    },
+    bio:{
+        type: String,
+        required: false,
+        trim: true
+    },
+    profileImg:{
+        type: String,
+        required: false,
         trim: true
     }
 },
@@ -57,5 +77,11 @@ userSchema.pre<IUser>('save', async function (next){
 userSchema.methods.comparePassword = async function(password: string): Promise<boolean> {
     return await bcrypt.compare(password, this.password)
 }
+
+userSchema.methods.editProfile = async function (username: string, bio: string): Promise<void> {
+    this.username = username;
+    this.bio = bio;
+    await this.save();
+  };
 
 export default model<IUser>('User', userSchema)

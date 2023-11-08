@@ -2,7 +2,7 @@ import { Schema, model, Document } from "mongoose";
 import { IUser } from "./user";
 import { ITweet } from "./tweet";
 
-interface ILike extends Document {
+export interface ILike extends Document {
   userId: IUser["_id"];
   tweetId: ITweet["_id"];
 }
