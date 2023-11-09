@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editUser = exports.getUsers = exports.deleteUser = exports.changeUsername = exports.changePassword = exports.signIn = exports.signUp = void 0;
+exports.searchUsers = exports.editUser = exports.getUsers = exports.deleteUser = exports.changeUsername = exports.changePassword = exports.signIn = exports.signUp = void 0;
 const user_1 = __importDefault(require("../models/user"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const config_1 = __importDefault(require("../config/config"));
@@ -157,3 +157,22 @@ const editUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.editUser = editUser;
+// busqueda de usuarios
+const searchUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { search } = req.body;
+        const users = yield user_1.default.find({
+            $or: [
+                { name: { $regex: search, $options: "i" } },
+                { username: { $regex: search, $options: "i" } },
+                { handle: { $regex: search, $options: "i" } },
+            ],
+        });
+        res.json(users);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error al buscar usuarios" });
+    }
+});
+exports.searchUsers = searchUsers;

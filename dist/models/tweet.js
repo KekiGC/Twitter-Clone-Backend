@@ -24,13 +24,15 @@ const tweetSchema = new mongoose_1.Schema({
         type: String,
         default: null,
     },
-    // likes:{
-    //   type: Schema.Types.ObjectId,
-    //   ref: "Like",
-    //   default: null,
-    // }
+    likes: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Like" }],
 }, {
     versionKey: false,
     timestamps: true,
+});
+tweetSchema.pre("validate", function (next) {
+    if (this.isComment && !this.parentTweetId) {
+        throw new Error("A comment tweet must have a valid parentTweetId");
+    }
+    next();
 });
 exports.default = (0, mongoose_1.model)("Tweet", tweetSchema);

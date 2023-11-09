@@ -6,6 +6,7 @@ import  express  from 'express';
  import authRoutes from './routes/auth.routes'
  import specialRoutes from './routes/special.routes'
  import tweetRoutes from './routes/tweet.routes'
+ import followerRoutes from './routes/follower.routes'
 
  //inicio
  const app =  express();
@@ -29,5 +30,6 @@ app.get('/', (req, res) => {
 app.use(authRoutes);
 app.use(specialRoutes);
 app.use(tweetRoutes);
+app.use(followerRoutes);
 
  export default app;
