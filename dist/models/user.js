@@ -28,6 +28,12 @@ const userSchema = new mongoose_1.Schema({
         required: true,
         trim: true
     },
+    handle: {
+        type: String,
+        unique: true,
+        required: true,
+        trim: true
+    },
     password: ({
         type: String,
         required: true
@@ -40,6 +46,16 @@ const userSchema = new mongoose_1.Schema({
     lastname: {
         type: String,
         required: true,
+        trim: true
+    },
+    bio: {
+        type: String,
+        required: false,
+        trim: true
+    },
+    profileImg: {
+        type: String,
+        required: false,
         trim: true
     }
 }, {
@@ -60,6 +76,13 @@ userSchema.pre('save', function (next) {
 userSchema.methods.comparePassword = function (password) {
     return __awaiter(this, void 0, void 0, function* () {
         return yield bcrypt_1.default.compare(password, this.password);
+    });
+};
+userSchema.methods.editProfile = function (username, bio) {
+    return __awaiter(this, void 0, void 0, function* () {
+        this.username = username;
+        this.bio = bio;
+        yield this.save();
     });
 };
 exports.default = (0, mongoose_1.model)('User', userSchema);

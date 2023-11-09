@@ -5,6 +5,7 @@ import  express  from 'express';
  import passportMiddleware from './middlewares/passport';
  import authRoutes from './routes/auth.routes'
  import specialRoutes from './routes/special.routes'
+ import tweetRoutes from './routes/tweet.routes'
 
  //inicio
  const app =  express();
@@ -27,5 +28,6 @@ app.get('/', (req, res) => {
 
 app.use(authRoutes);
 app.use(specialRoutes);
+app.use(tweetRoutes);
 
  export default app;
