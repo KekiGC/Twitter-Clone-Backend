@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.likeTweet = exports.getTweetById = exports.deleteTweet = exports.getTweetsByUser = exports.getTweets = exports.createTweet = void 0;
+exports.editTweet = exports.getTweetsLikedByUser = exports.createTweetComment = exports.getTweetComments = exports.unlikeTweet = exports.likeTweet = exports.getTweetById = exports.deleteTweet = exports.getTweetsByUser = exports.getTweets = exports.createTweet = void 0;
 const tweet_1 = __importDefault(require("../models/tweet"));
 const user_1 = __importDefault(require("../models/user"));
 const like_1 = __importDefault(require("../models/like"));
@@ -27,7 +27,8 @@ exports.createTweet = createTweet;
 // Obtener todos los tweets
 const getTweets = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const tweets = yield tweet_1.default.find().populate('userId', 'username handle profileImg');
+        const tweets = yield tweet_1.default.find().populate('userId', 'username handle profileImg')
+            .sort({ createdAt: -1 }).exec();
         res.status(200).json(tweets);
     }
     catch (error) {
@@ -40,7 +41,8 @@ exports.getTweets = getTweets;
 const getTweetsByUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { userId } = req.params;
-        const tweets = yield tweet_1.default.find({ userId }).populate('userId', 'username handle profileImg');
+        const tweets = yield tweet_1.default.find({ userId })
+            .populate('userId', 'username handle profileImg');
         res.status(200).json(tweets);
     }
     catch (error) {
@@ -100,9 +102,119 @@ const getTweetById = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 exports.getTweetById = getTweetById;
 // dar like a un tweet
 const likeTweet = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userID, tweetID } = req.body;
-    const newLike = new like_1.default({ userId: userID, tweetId: tweetID });
-    yield newLike.save();
-    return res.status(200).json(newLike);
+    try {
+        const { tweetId } = req.params;
+        const { userId } = req.body;
+        const tweet = yield tweet_1.default.findById(tweetId);
+        if (!tweet) {
+            return res.status(404).json({ message: 'Tweet not found' });
+        }
+        const existingLike = yield like_1.default.findOne({ tweetId, userId });
+        if (existingLike) {
+            return res.status(400).json({ message: 'User has already liked the tweet' });
+        }
+        // Crear un nuevo like
+        const like = new like_1.default({ tweetId, userId });
+        yield like.save();
+        return res.status(200).json(like);
+    }
+    catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Error liking the tweet' });
+    }
 });
 exports.likeTweet = likeTweet;
+// Quitar like de un tweet
+const unlikeTweet = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { tweetId } = req.params;
+        const { userId } = req.body;
+        const tweet = yield tweet_1.default.findById(tweetId);
+        if (!tweet) {
+            return res.status(404).json({ message: 'Tweet not found' });
+        }
+        const existingLike = yield like_1.default.findOne({ tweetId, userId });
+        if (!existingLike) {
+            return res.status(400).json({ message: 'User has not liked the tweet' });
+        }
+        // Eliminar el like existente
+        yield like_1.default.findByIdAndDelete(existingLike._id);
+        return res.status(200).json({ message: 'Tweet unliked successfully' });
+    }
+    catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Error unliking the tweet' });
+    }
+});
+exports.unlikeTweet = unlikeTweet;
+// Obtener comentarios de un tweet
+const getTweetComments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { tweetId } = req.params;
+        const comments = yield tweet_1.default.find({ parentTweetId: tweetId, isComment: true }).sort({ createdAt: -1 }).exec();
+        res.json(comments);
+    }
+    catch (error) {
+        res.status(500).json({ error: "Error al obtener los comentarios del tweet" });
+    }
+});
+exports.getTweetComments = getTweetComments;
+// Crear un comentario de un tweet
+const createTweetComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { tweetId } = req.params;
+        const { content, userId } = req.body;
+        const parentTweet = yield tweet_1.default.findById(tweetId).exec();
+        if (!parentTweet) {
+            return res.status(404).json({ error: "Tweet no encontrado" });
+        }
+        const comment = new tweet_1.default({
+            content,
+            userId,
+            isComment: true,
+            parentTweetId: parentTweet._id,
+        });
+        yield comment.save();
+        res.json(comment);
+    }
+    catch (error) {
+        res.status(500).json({ error: "Error al crear el comentario" });
+    }
+});
+exports.createTweetComment = createTweetComment;
+// Obtener los tweets que le gustan a un usuario
+const getTweetsLikedByUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { userId } = req.params;
+        // Obtener los IDs de los tweets que le dio like el usuario
+        const likedTweets = yield like_1.default.find({ userId }).exec();
+        const likedTweetIds = likedTweets.map((like) => like.tweetId);
+        // Obtener los tweets que tienen los IDs encontrados
+        const tweets = yield tweet_1.default.find({ _id: { $in: likedTweetIds } })
+            .populate('userId', 'username handle profileImg').sort({ createdAt: -1 }).exec();
+        res.status(200).json(tweets);
+    }
+    catch (error) {
+        res.status(500).json({ error: "Error al obtener los tweets que le dio like el usuario" });
+    }
+});
+exports.getTweetsLikedByUser = getTweetsLikedByUser;
+// editar un tweet
+const editTweet = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { tweetID } = req.params;
+        const { newData } = req.body;
+        const tweet = yield tweet_1.default.findById(tweetID);
+        if (!tweet) {
+            return res.status(404).json({ message: 'Tweet not found' });
+        }
+        tweet.content = newData.content || tweet.content;
+        const updatedTweet = yield tweet.save();
+        return res.status(200).json(updatedTweet);
+    }
+    catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Error editing the tweet' });
+    }
+});
+exports.editTweet = editTweet;

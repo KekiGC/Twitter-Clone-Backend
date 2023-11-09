@@ -166,3 +166,23 @@ export const editUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error al editar el usuario' });
   }
 };
+
+// busqueda de usuarios
+export const searchUsers = async (req: Request, res: Response) => {
+  try {
+    const { search } = req.body;
+
+    const users: IUser[] = await User.find({
+      $or: [
+        { name: { $regex: search, $options: "i" } },
+        { username: { $regex: search, $options: "i" } },
+        { handle: { $regex: search, $options: "i" } },
+      ],
+    });
+
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al buscar usuarios" });
+  }
+};

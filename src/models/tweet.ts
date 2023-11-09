@@ -1,6 +1,6 @@
 import { Schema, model, Document } from "mongoose";
 import { IUser } from "./user";
-import { ILike } from "./like"
+import { ILike } from "./like";
 
 export interface ITweet extends Document {
   content: string;
@@ -8,7 +8,7 @@ export interface ITweet extends Document {
   isComment: boolean;
   parentTweetId: ITweet["_id"] | null;
   attachment: string | null;
-  // likes: ILike["_id"] | null;
+  likes: Schema.Types.ObjectId[];
 }
 
 const tweetSchema = new Schema<ITweet>(
@@ -35,16 +35,19 @@ const tweetSchema = new Schema<ITweet>(
       type: String,
       default: null,
     },
-    // likes:{
-    //   type: Schema.Types.ObjectId,
-    //   ref: "Like",
-    //   default: null,
-    // }
+    likes: [{ type: Schema.Types.ObjectId, ref: "Like" }],
   },
   {
     versionKey: false,
     timestamps: true,
   }
 );
+
+tweetSchema.pre<ITweet>("validate", function (next) {
+  if (this.isComment && !this.parentTweetId) {
+    throw new Error("A comment tweet must have a valid parentTweetId");
+  }
+  next();
+});
 
 export default model<ITweet>("Tweet", tweetSchema);

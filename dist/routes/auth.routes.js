@@ -9,4 +9,5 @@ router.post('/change-password', user_controller_1.changePassword);
 router.delete('/delete-user', user_controller_1.deleteUser);
 router.get('/get-users', user_controller_1.getUsers);
 router.put('/edit-user', user_controller_1.editUser);
+router.post('/search-users', user_controller_1.searchUsers);
 exports.default = router;

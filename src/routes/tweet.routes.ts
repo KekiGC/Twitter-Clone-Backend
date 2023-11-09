@@ -1,12 +1,38 @@
 import { Router } from "express";
 const router = Router();
 
-import { createTweet, getTweets, getTweetsByUser, deleteTweet, getTweetById } from "../controllers/tweet.controller";
+import {
+  createTweet,
+  getTweets,
+  getTweetsByUser,
+  deleteTweet,
+  getTweetById,
+  likeTweet,
+  editTweet,
+  unlikeTweet,
+  getTweetsLikedByUser,
+  getTweetComments,
+  createTweetComment,
+} from "../controllers/tweet.controller";
 
-router.post('/tweet', createTweet)
-router.get('/tweet', getTweets)
-router.get('/tweet/user/:userId', getTweetsByUser)
-router.get('/tweet/:tweetId', getTweetById)
-router.delete('/tweet/:tweetId', deleteTweet)
+// crud tweets
+router.post("/tweet", createTweet);
+router.get("/tweet", getTweets);
+router.put("/tweet/:tweetId", editTweet);
+router.delete("/tweet/:tweetId", deleteTweet);
+
+// gets
+router.get("/tweet/user/:userId", getTweetsByUser);
+router.get("/tweet/:tweetId", getTweetById);
+
+// likes
+router.post("/tweet/:tweetId/like", likeTweet);
+router.delete("/tweet/:tweetId/unlike", unlikeTweet);
+router.get("/tweet/liked/:userId", getTweetsLikedByUser);
+
+// comments
+router.post("/tweet/:tweetId/comment", createTweetComment);
+router.get("/tweet/:tweetId/comments", getTweetComments);
+
 
 export default router;
