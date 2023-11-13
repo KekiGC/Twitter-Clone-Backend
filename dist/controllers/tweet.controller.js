@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editTweet = exports.getTweetsLikedByUser = exports.createTweetComment = exports.getTweetComments = exports.unlikeTweet = exports.likeTweet = exports.getTweetById = exports.deleteTweet = exports.getTweetsByUser = exports.getTweets = exports.createTweet = void 0;
+exports.getParentTweetAndComments = exports.editTweet = exports.getTweetsLikedByUser = exports.createTweetComment = exports.unlikeTweet = exports.likeTweet = exports.getTweetById = exports.deleteTweet = exports.getTweetsByUser = exports.getTweets = exports.createTweet = void 0;
 const tweet_1 = __importDefault(require("../models/tweet"));
 const user_1 = __importDefault(require("../models/user"));
 const like_1 = __importDefault(require("../models/like"));
@@ -148,17 +148,15 @@ const unlikeTweet = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 });
 exports.unlikeTweet = unlikeTweet;
 // Obtener comentarios de un tweet
-const getTweetComments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { tweetId } = req.params;
-        const comments = yield tweet_1.default.find({ parentTweetId: tweetId, isComment: true }).sort({ createdAt: -1 }).exec();
-        res.json(comments);
-    }
-    catch (error) {
-        res.status(500).json({ error: "Error al obtener los comentarios del tweet" });
-    }
-});
-exports.getTweetComments = getTweetComments;
+// export const getTweetComments = async (req: Request, res: Response) => {
+//   try {
+//     const { tweetId } = req.params;
+//     const comments = await Tweet.find({ parentTweetId: tweetId, isComment: true }).sort({ createdAt: -1 }).exec();
+//     res.json(comments);
+//   } catch (error) {
+//     res.status(500).json({ error: "Error al obtener los comentarios del tweet" });
+//   }
+// };
 // Crear un comentario de un tweet
 const createTweetComment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -218,3 +216,21 @@ const editTweet = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.editTweet = editTweet;
+// obtener el parentTweet y sus comentarios
+const getParentTweetAndComments = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { tweetId } = req.params;
+        const parentTweet = yield tweet_1.default.findById(tweetId);
+        console.log(parentTweet);
+        if (!parentTweet) {
+            return res.status(404).json({ message: 'Tweet not found' });
+        }
+        const comments = yield tweet_1.default.find({ parentTweetId: tweetId, isComment: true });
+        return res.status(200).json({ parentTweet, comments });
+    }
+    catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Error getting the tweet and comments' });
+    }
+});
+exports.getParentTweetAndComments = getParentTweetAndComments;

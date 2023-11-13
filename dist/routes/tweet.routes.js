@@ -11,11 +11,12 @@ router.delete("/tweet/:tweetId", tweet_controller_1.deleteTweet);
 // gets
 router.get("/tweet/user/:userId", tweet_controller_1.getTweetsByUser);
 router.get("/tweet/:tweetId", tweet_controller_1.getTweetById);
+router.get("/tweet/:tweetId/comments", tweet_controller_1.getParentTweetAndComments);
 // likes
 router.post("/tweet/:tweetId/like", tweet_controller_1.likeTweet);
 router.delete("/tweet/:tweetId/unlike", tweet_controller_1.unlikeTweet);
 router.get("/tweet/liked/:userId", tweet_controller_1.getTweetsLikedByUser);
 // comments
 router.post("/tweet/:tweetId/comment", tweet_controller_1.createTweetComment);
-router.get("/tweet/:tweetId/comments", tweet_controller_1.getTweetComments);
+//router.get("/tweet/:tweetId/comments", getTweetComments);
 exports.default = router;

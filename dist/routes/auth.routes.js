@@ -10,4 +10,5 @@ router.delete('/delete-user', user_controller_1.deleteUser);
 router.get('/get-users', user_controller_1.getUsers);
 router.put('/edit-user', user_controller_1.editUser);
 router.post('/search-users', user_controller_1.searchUsers);
+router.get('/users/:username', user_controller_1.getUserByUsername);
 exports.default = router;

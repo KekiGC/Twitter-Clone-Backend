@@ -154,15 +154,15 @@ export const unlikeTweet = async (req: Request, res: Response) => {
 };
 
 // Obtener comentarios de un tweet
-export const getTweetComments = async (req: Request, res: Response) => {
-  try {
-    const { tweetId } = req.params;
-    const comments = await Tweet.find({ parentTweetId: tweetId, isComment: true }).sort({ createdAt: -1 }).exec();
-    res.json(comments);
-  } catch (error) {
-    res.status(500).json({ error: "Error al obtener los comentarios del tweet" });
-  }
-};
+// export const getTweetComments = async (req: Request, res: Response) => {
+//   try {
+//     const { tweetId } = req.params;
+//     const comments = await Tweet.find({ parentTweetId: tweetId, isComment: true }).sort({ createdAt: -1 }).exec();
+//     res.json(comments);
+//   } catch (error) {
+//     res.status(500).json({ error: "Error al obtener los comentarios del tweet" });
+//   }
+// };
 
 // Crear un comentario de un tweet
 export const createTweetComment = async (req: Request, res: Response) => {
@@ -224,5 +224,22 @@ export const editTweet = async (req: Request, res: Response): Promise<Response> 
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Error editing the tweet' });
+  }
+};
+
+// obtener el parentTweet y sus comentarios
+export const getParentTweetAndComments = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { tweetId } = req.params;
+    const parentTweet = await Tweet.findById(tweetId);
+    console.log(parentTweet);
+    if (!parentTweet) {
+      return res.status(404).json({ message: 'Tweet not found' });
+    }
+    const comments = await Tweet.find({ parentTweetId: tweetId, isComment: true });
+    return res.status(200).json({ parentTweet, comments });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Error getting the tweet and comments' });
   }
 };

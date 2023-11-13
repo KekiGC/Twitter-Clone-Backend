@@ -111,6 +111,28 @@ export const changeUsername = async (req: Request,res: Response): Promise<Respon
   }
 };
 
+//obtener un usuario por su username
+export const getUserByUsername = async (req: Request, res: Response): Promise<Response> => {
+  const { username } = req.params;
+
+  if (!username) {
+    return res.status(400).json({ msg: "Please provide username" });
+  }
+
+  try {
+    const user = await User.findOne({ username });
+    console.log(user);
+
+    if (!user) {
+      return res.status(400).json({ msg: "User not found" });
+    }
+
+    return res.status(200).json(user);
+  } catch (error) {
+    return res.status(500).json({ msg: "Internal server error" });
+  }
+};
+
 // borrar un usuario
 export const deleteUser = async (req: Request, res: Response): Promise<Response> => {
   const { email } = req.body;
