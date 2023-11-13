@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchUsers = exports.editUser = exports.getUsers = exports.deleteUser = exports.changeUsername = exports.changePassword = exports.signIn = exports.signUp = void 0;
+exports.searchUsers = exports.editUser = exports.getUsers = exports.deleteUser = exports.getUserByUsername = exports.changeUsername = exports.changePassword = exports.signIn = exports.signUp = void 0;
 const user_1 = __importDefault(require("../models/user"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const config_1 = __importDefault(require("../config/config"));
@@ -107,6 +107,25 @@ const changeUsername = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.changeUsername = changeUsername;
+//obtener un usuario por su username
+const getUserByUsername = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { username } = req.params;
+    if (!username) {
+        return res.status(400).json({ msg: "Please provide username" });
+    }
+    try {
+        const user = yield user_1.default.findOne({ username });
+        console.log(user);
+        if (!user) {
+            return res.status(400).json({ msg: "User not found" });
+        }
+        return res.status(200).json(user);
+    }
+    catch (error) {
+        return res.status(500).json({ msg: "Internal server error" });
+    }
+});
+exports.getUserByUsername = getUserByUsername;
 // borrar un usuario
 const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email } = req.body;
