@@ -88,7 +88,6 @@ const getTweetById = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             user: {
                 _id: user._id,
                 username: user.username,
-                handle: user.handle,
                 profileImg: user.profileImg,
             }
         };

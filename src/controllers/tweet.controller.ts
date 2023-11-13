@@ -84,7 +84,6 @@ export const getTweetById = async (req: Request, res: Response) => {
       user: {
         _id: user._id,
         username: user.username,
-        handle: user.handle,
         profileImg: user.profileImg,
       }
     };
