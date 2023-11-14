@@ -27,7 +27,8 @@ exports.createTweet = createTweet;
 // Obtener todos los tweets
 const getTweets = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const tweets = yield tweet_1.default.find().populate('userId', 'username handle profileImg')
+        const tweets = yield tweet_1.default.find({ isComment: false })
+            .populate('userId', 'username handle profileImg')
             .sort({ createdAt: -1 }).exec();
         res.status(200).json(tweets);
     }
