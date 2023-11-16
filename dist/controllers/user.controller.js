@@ -22,43 +22,55 @@ function createToken(user) {
     });
 }
 const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!req.body.name || !req.body.lastname || !req.body.email || !req.body.password || !req.body.username) {
-        return res.status(400).json({ msg: 'Plase. Send your email, user and password' });
+    try {
+        if (!req.body.name || !req.body.lastname || !req.body.email || !req.body.password || !req.body.username) {
+            return res.status(400).json({ msg: 'Please send your name, lastname, email, username, and password' });
+        }
+        const user = yield user_1.default.findOne({ email: req.body.email });
+        console.log(user);
+        if (user) {
+            return res.status(400).json({ msg: 'The user already exists' });
+        }
+        const newUser = new user_1.default(req.body);
+        yield newUser.save();
+        return res.status(201).json(newUser);
     }
-    const user = yield user_1.default.findOne({ email: req.body.email });
-    console.log(user);
-    if (user) {
-        return res.status(400).json({ msg: "The user already exist" });
+    catch (error) {
+        console.error(error);
+        return res.status(500).json({ msg: 'Internal server error' });
     }
-    const newUser = new user_1.default(req.body);
-    yield newUser.save();
-    return res.status(201).json(newUser);
 });
 exports.signUp = signUp;
 const signIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(req.body);
-    if ((!req.body.email && !req.body.username) || !req.body.password) {
-        return res.status(400).json({ msg: "Please send your email/username and password" });
+    try {
+        console.log(req.body);
+        if ((!req.body.email && !req.body.username) || !req.body.password) {
+            return res.status(400).json({ msg: 'Please send your email/username and password' });
+        }
+        let user;
+        if (req.body.email) {
+            user = yield user_1.default.findOne({ email: req.body.email });
+        }
+        else if (req.body.username) {
+            user = yield user_1.default.findOne({ username: req.body.username });
+        }
+        if (!user) {
+            return res.status(400).json({ msg: 'The user does not exist' });
+        }
+        const isMatch = yield user.comparePassword(req.body.password);
+        if (isMatch) {
+            const token = createToken(user);
+            const userID = user._id; // Obtener el userID del usuario
+            return res.status(200).json({ token, userID });
+        }
+        return res.status(400).json({
+            msg: 'The email/username or password is incorrect',
+        });
     }
-    let user;
-    if (req.body.email) {
-        user = yield user_1.default.findOne({ email: req.body.email });
+    catch (error) {
+        console.error(error);
+        return res.status(500).json({ msg: 'Internal server error' });
     }
-    else if (req.body.username) {
-        user = yield user_1.default.findOne({ username: req.body.username });
-    }
-    if (!user) {
-        return res.status(400).json({ msg: "The user does not exist" });
-    }
-    const isMatch = yield user.comparePassword(req.body.password);
-    if (isMatch) {
-        const token = createToken(user);
-        const userID = user._id; // Obtener el userID del usuario
-        return res.status(200).json({ token, userID });
-    }
-    return res.status(400).json({
-        msg: "The email/username or password are incorrect",
-    });
 });
 exports.signIn = signIn;
 const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
