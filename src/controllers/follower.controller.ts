@@ -3,34 +3,32 @@ import Follower, { IFollower } from "../models/follower";
 import User, { IUser } from "../models/user";
 import Tweet, { ITweet } from "../models/tweet";
 
-// Seguir a un usuario
+// Seguir o dejar de seguir a un usuario
 export const followUser = async (req: Request, res: Response) => {
   try {
     const { followerId, followingId } = req.body;
 
-    const follower: IFollower = new Follower({
+    // Verificar si ya se está siguiendo al usuario
+    const existingFollower = await Follower.findOneAndDelete({
       followerId,
       followingId,
     });
 
-    await follower.save();
+    if (existingFollower) {
+      res.json({ message: "Dejaste de seguir al usuario" });
+    } else {
+      // Si no se está siguiendo, seguir al usuario
+      const follower: IFollower = new Follower({
+        followerId,
+        followingId,
+      });
 
-    res.json({ message: "Usuario seguido correctamente" });
+      await follower.save();
+      res.json({ message: "Usuario seguido correctamente" });
+      console.log(follower)
+    }
   } catch (error) {
-    res.status(500).json({ error: "Error al seguir al usuario" });
-  }
-};
-
-// Dejar de seguir a un usuario
-export const unfollowUser = async (req: Request, res: Response) => {
-  try {
-    const { followerId, followingId } = req.body;
-
-    await Follower.findOneAndDelete({ followerId, followingId }).exec();
-
-    res.json({ message: "Dejaste de seguir al usuario correctamente" });
-  } catch (error) {
-    res.status(500).json({ error: "Error al dejar de seguir al usuario" });
+    res.status(500).json({ error: "Error al seguir o dejar de seguir al usuario" });
   }
 };
 

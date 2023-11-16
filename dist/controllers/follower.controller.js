@@ -12,38 +12,38 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getFeed = exports.getFollowings = exports.getFollowers = exports.unfollowUser = exports.followUser = void 0;
+exports.getFeed = exports.getFollowings = exports.getFollowers = exports.followUser = void 0;
 const follower_1 = __importDefault(require("../models/follower"));
 const user_1 = __importDefault(require("../models/user"));
 const tweet_1 = __importDefault(require("../models/tweet"));
-// Seguir a un usuario
+// Seguir o dejar de seguir a un usuario
 const followUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { followerId, followingId } = req.body;
-        const follower = new follower_1.default({
+        // Verificar si ya se está siguiendo al usuario
+        const existingFollower = yield follower_1.default.findOneAndDelete({
             followerId,
             followingId,
         });
-        yield follower.save();
-        res.json({ message: "Usuario seguido correctamente" });
+        if (existingFollower) {
+            res.json({ message: "Dejaste de seguir al usuario" });
+        }
+        else {
+            // Si no se está siguiendo, seguir al usuario
+            const follower = new follower_1.default({
+                followerId,
+                followingId,
+            });
+            yield follower.save();
+            res.json({ message: "Usuario seguido correctamente" });
+            console.log(follower);
+        }
     }
     catch (error) {
-        res.status(500).json({ error: "Error al seguir al usuario" });
+        res.status(500).json({ error: "Error al seguir o dejar de seguir al usuario" });
     }
 });
 exports.followUser = followUser;
-// Dejar de seguir a un usuario
-const unfollowUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { followerId, followingId } = req.body;
-        yield follower_1.default.findOneAndDelete({ followerId, followingId }).exec();
-        res.json({ message: "Dejaste de seguir al usuario correctamente" });
-    }
-    catch (error) {
-        res.status(500).json({ error: "Error al dejar de seguir al usuario" });
-    }
-});
-exports.unfollowUser = unfollowUser;
 // Obtener los seguidores de un usuario
 const getFollowers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
