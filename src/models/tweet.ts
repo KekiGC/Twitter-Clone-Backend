@@ -8,6 +8,7 @@ export interface ITweet extends Document {
   isComment: boolean;
   parentTweetId: ITweet["_id"] | null;
   attachment: string | null;
+  profileImg: string | null;
   likes: Schema.Types.ObjectId[];
 }
 
@@ -32,6 +33,10 @@ const tweetSchema = new Schema<ITweet>(
       default: null,
     },
     attachment: {
+      type: String,
+      default: null,
+    },
+    profileImg: {
       type: String,
       default: null,
     },

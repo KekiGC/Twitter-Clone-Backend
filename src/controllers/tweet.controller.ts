@@ -16,7 +16,7 @@ export const createTweet = async (req: Request, res: Response): Promise<Response
 export const getTweets = async (req: Request, res: Response) => {
   try {
     const tweets: ITweet[] = await Tweet.find({ isComment: false })
-    .populate('userId', 'username handle profileImg')
+    .populate('userId', 'username profileImg')
     .sort({ createdAt: -1 }).exec();
 
     res.status(200).json(tweets);

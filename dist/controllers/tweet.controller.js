@@ -28,7 +28,7 @@ exports.createTweet = createTweet;
 const getTweets = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const tweets = yield tweet_1.default.find({ isComment: false })
-            .populate('userId', 'username handle profileImg')
+            .populate('userId', 'username profileImg')
             .sort({ createdAt: -1 }).exec();
         res.status(200).json(tweets);
     }
