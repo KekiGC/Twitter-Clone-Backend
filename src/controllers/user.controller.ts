@@ -10,49 +10,59 @@ function createToken(user: IUser) {
 }
 
 export const signUp = async (req: Request, res: Response): Promise<Response> => {
-  if(!req.body.name || !req.body.lastname || !req.body.email || !req.body.password || !req.body.username){
-    return res.status(400).json({msg:'Plase. Send your email, user and password'})
-}
+  try {
+    if (!req.body.name || !req.body.lastname || !req.body.email || !req.body.password || !req.body.username) {
+      return res.status(400).json({ msg: 'Please send your name, lastname, email, username, and password' });
+    }
 
-  const user = await User.findOne({ email: req.body.email });
-  console.log(user);
-  if (user) {
-    return res.status(400).json({ msg: "The user already exist" });
+    const user = await User.findOne({ email: req.body.email });
+    console.log(user);
+    if (user) {
+      return res.status(400).json({ msg: 'The user already exists' });
+    }
+
+    const newUser = new User(req.body);
+    await newUser.save();
+
+    return res.status(201).json(newUser);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ msg: 'Internal server error' });
   }
-
-  const newUser = new User(req.body);
-  await newUser.save();
-
-  return res.status(201).json(newUser);
 };
 
 export const signIn = async (req: Request, res: Response) => {
-  console.log(req.body);
-  if ((!req.body.email && !req.body.username) || !req.body.password) {
-    return res.status(400).json({ msg: "Please send your email/username and password" });
-  }
+  try {
+    console.log(req.body);
+    if ((!req.body.email && !req.body.username) || !req.body.password) {
+      return res.status(400).json({ msg: 'Please send your email/username and password' });
+    }
 
-  let user;
-  if (req.body.email) {
-    user = await User.findOne({ email: req.body.email });
-  } else if (req.body.username) {
-    user = await User.findOne({ username: req.body.username });
-  }
+    let user;
+    if (req.body.email) {
+      user = await User.findOne({ email: req.body.email });
+    } else if (req.body.username) {
+      user = await User.findOne({ username: req.body.username });
+    }
 
-  if (!user) {
-    return res.status(400).json({ msg: "The user does not exist" });
-  }
+    if (!user) {
+      return res.status(400).json({ msg: 'The user does not exist' });
+    }
 
-  const isMatch = await user.comparePassword(req.body.password);
-  if (isMatch) {
-    const token = createToken(user);
-    const userID = user._id; // Obtener el userID del usuario
-    return res.status(200).json({ token, userID });
-  }
+    const isMatch = await user.comparePassword(req.body.password);
+    if (isMatch) {
+      const token = createToken(user);
+      const userID = user._id; // Obtener el userID del usuario
+      return res.status(200).json({ token, userID });
+    }
 
-  return res.status(400).json({
-    msg: "The email/username or password are incorrect",
-  });
+    return res.status(400).json({
+      msg: 'The email/username or password is incorrect',
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ msg: 'Internal server error' });
+  }
 };
 
 export const changePassword = async (req: Request, res: Response): Promise<Response> => {
