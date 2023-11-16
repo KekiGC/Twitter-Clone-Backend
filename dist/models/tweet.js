@@ -24,6 +24,10 @@ const tweetSchema = new mongoose_1.Schema({
         type: String,
         default: null,
     },
+    profileImg: {
+        type: String,
+        default: null,
+    },
     likes: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Like" }],
 }, {
     versionKey: false,
