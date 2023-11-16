@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getParentTweetAndComments = exports.editTweet = exports.getTweetsLikedByUser = exports.createTweetComment = exports.unlikeTweet = exports.likeTweet = exports.getTweetById = exports.deleteTweet = exports.getTweetsByUser = exports.getTweets = exports.createTweet = void 0;
+exports.getTweetsByFilter = exports.getParentTweetAndComments = exports.editTweet = exports.getTweetsLikedByUser = exports.createTweetComment = exports.likeTweet = exports.getTweetById = exports.deleteTweet = exports.getTweetsByUser = exports.getTweets = exports.createTweet = void 0;
 const tweet_1 = __importDefault(require("../models/tweet"));
 const user_1 = __importDefault(require("../models/user"));
 const like_1 = __importDefault(require("../models/like"));
@@ -111,7 +111,8 @@ const likeTweet = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         const existingLike = yield like_1.default.findOne({ tweetId, userId });
         if (existingLike) {
-            return res.status(400).json({ message: 'User has already liked the tweet' });
+            yield like_1.default.findByIdAndDelete(existingLike._id);
+            return res.status(200).json({ message: 'Tweet unliked successfully' });
         }
         // Crear un nuevo like
         const like = new like_1.default({ tweetId, userId });
@@ -124,29 +125,6 @@ const likeTweet = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.likeTweet = likeTweet;
-// Quitar like de un tweet
-const unlikeTweet = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { tweetId } = req.params;
-        const { userId } = req.body;
-        const tweet = yield tweet_1.default.findById(tweetId);
-        if (!tweet) {
-            return res.status(404).json({ message: 'Tweet not found' });
-        }
-        const existingLike = yield like_1.default.findOne({ tweetId, userId });
-        if (!existingLike) {
-            return res.status(400).json({ message: 'User has not liked the tweet' });
-        }
-        // Eliminar el like existente
-        yield like_1.default.findByIdAndDelete(existingLike._id);
-        return res.status(200).json({ message: 'Tweet unliked successfully' });
-    }
-    catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Error unliking the tweet' });
-    }
-});
-exports.unlikeTweet = unlikeTweet;
 // Obtener comentarios de un tweet
 // export const getTweetComments = async (req: Request, res: Response) => {
 //   try {
@@ -234,3 +212,49 @@ const getParentTweetAndComments = (req, res) => __awaiter(void 0, void 0, void 0
     }
 });
 exports.getParentTweetAndComments = getParentTweetAndComments;
+// obtener los tweets filtrados
+const getTweetsByFilter = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { sortOrder } = req.query;
+        let sortQuery = {};
+        if (sortOrder === "recent") {
+            sortQuery = { createdAt: -1 };
+        }
+        else if (sortOrder === "oldest") {
+            sortQuery = { createdAt: 1 };
+        }
+        else if (sortOrder === "mostLikes") {
+            sortQuery = { likesCount: -1 };
+        }
+        else if (sortOrder === "leastLikes") {
+            sortQuery = { likesCount: 1 };
+        }
+        const tweets = yield tweet_1.default.aggregate([
+            {
+                $match: { isComment: false },
+            },
+            {
+                $lookup: {
+                    from: "likes",
+                    localField: "_id",
+                    foreignField: "tweetId",
+                    as: "likes",
+                },
+            },
+            {
+                $addFields: {
+                    likesCount: { $size: "$likes" },
+                },
+            },
+            {
+                $sort: sortQuery,
+            },
+        ]);
+        res.status(200).json(tweets);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error al obtener los tweets" });
+    }
+});
+exports.getTweetsByFilter = getTweetsByFilter;

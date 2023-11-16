@@ -9,11 +9,11 @@ import {
   getTweetById,
   likeTweet,
   editTweet,
-  unlikeTweet,
   getTweetsLikedByUser,
   // getTweetComments,
   createTweetComment,
-  getParentTweetAndComments
+  getParentTweetAndComments,
+  getTweetsByFilter
 } from "../controllers/tweet.controller";
 
 // crud tweets
@@ -26,10 +26,10 @@ router.delete("/tweet/:tweetId", deleteTweet);
 router.get("/tweet/user/:userId", getTweetsByUser);
 router.get("/tweet/:tweetId", getTweetById);
 router.get("/tweet/:tweetId/comments", getParentTweetAndComments);
+router.get("/tweets/filter", getTweetsByFilter);
 
 // likes
 router.post("/tweet/:tweetId/like", likeTweet);
-router.delete("/tweet/:tweetId/unlike", unlikeTweet);
 router.get("/tweet/liked/:userId", getTweetsLikedByUser);
 
 // comments

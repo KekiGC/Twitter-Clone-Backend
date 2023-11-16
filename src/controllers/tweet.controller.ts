@@ -111,7 +111,8 @@ export const likeTweet = async (req: Request, res: Response) => {
     const existingLike: ILike | null = await Like.findOne({ tweetId, userId });
 
     if (existingLike) {
-      return res.status(400).json({ message: 'User has already liked the tweet' });
+      await Like.findByIdAndDelete(existingLike._id);
+      return res.status(200).json({ message: 'Tweet unliked successfully' })
     }
 
     // Crear un nuevo like
@@ -125,33 +126,6 @@ export const likeTweet = async (req: Request, res: Response) => {
   }
 };
 
-// Quitar like de un tweet
-export const unlikeTweet = async (req: Request, res: Response) => {
-  try {
-    const { tweetId } = req.params;
-    const { userId } = req.body;
-
-    const tweet: ITweet | null = await Tweet.findById(tweetId);
-
-    if (!tweet) {
-      return res.status(404).json({ message: 'Tweet not found' });
-    }
-
-    const existingLike: ILike | null = await Like.findOne({ tweetId, userId });
-
-    if (!existingLike) {
-      return res.status(400).json({ message: 'User has not liked the tweet' });
-    }
-
-    // Eliminar el like existente
-    await Like.findByIdAndDelete(existingLike._id);
-
-    return res.status(200).json({ message: 'Tweet unliked successfully' });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Error unliking the tweet' });
-  }
-};
 
 // Obtener comentarios de un tweet
 // export const getTweetComments = async (req: Request, res: Response) => {
@@ -241,5 +215,51 @@ export const getParentTweetAndComments = async (req: Request, res: Response): Pr
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Error getting the tweet and comments' });
+  }
+};
+
+// obtener los tweets filtrados
+export const getTweetsByFilter = async (req: Request, res: Response) => {
+  try {
+    const { sortOrder } = req.query;
+
+    let sortQuery: any = {};
+
+    if (sortOrder === "recent") {
+      sortQuery = { createdAt: -1 };
+    } else if (sortOrder === "oldest") {
+      sortQuery = { createdAt: 1 };
+    } else if (sortOrder === "mostLikes") {
+      sortQuery = { likesCount: -1 };
+    } else if (sortOrder === "leastLikes") {
+      sortQuery = { likesCount: 1 };
+    }
+
+    const tweets: ITweet[] = await Tweet.aggregate([
+      {
+        $match: { isComment: false },
+      },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "tweetId",
+          as: "likes",
+        },
+      },
+      {
+        $addFields: {
+          likesCount: { $size: "$likes" },
+        },
+      },
+      {
+        $sort: sortQuery,
+      },
+    ]);
+
+    res.status(200).json(tweets);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al obtener los tweets" });
   }
 };
