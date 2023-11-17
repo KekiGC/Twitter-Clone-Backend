@@ -6,8 +6,8 @@ import Like, { ILike } from "../models/like";
 
 // crear un tweet
 export const createTweet = async (req: Request, res: Response): Promise<Response> => {
-  const { content, userId, isComment, parentTweetID, img } = req.body;
-  const newTweet = new Tweet({ content, userId, isComment, parentTweetID, img });
+  const { content, userId, isComment, parentTweetID, attachment } = req.body;
+  const newTweet = new Tweet({ content, userId, isComment, parentTweetID, attachment });
   await newTweet.save();
   return res.status(201).json(newTweet);
 };
