@@ -145,7 +145,7 @@ export const likeTweet = async (req: Request, res: Response) => {
 export const createTweetComment = async (req: Request, res: Response) => {
   try {
     const { tweetId } = req.params;
-    const { content, userId } = req.body;
+    const { content, userId, attachment } = req.body;
 
     const parentTweet = await Tweet.findById(tweetId).exec();
     if (!parentTweet) {
@@ -157,6 +157,7 @@ export const createTweetComment = async (req: Request, res: Response) => {
       userId,
       isComment: true,
       parentTweetId: parentTweet._id,
+      attachment,
     });
 
     await comment.save();
