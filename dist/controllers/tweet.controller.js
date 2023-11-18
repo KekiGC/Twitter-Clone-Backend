@@ -18,8 +18,8 @@ const user_1 = __importDefault(require("../models/user"));
 const like_1 = __importDefault(require("../models/like"));
 // crear un tweet
 const createTweet = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { content, userId, isComment, parentTweetID, img } = req.body;
-    const newTweet = new tweet_1.default({ content, userId, isComment, parentTweetID, img });
+    const { content, userId, isComment, parentTweetID, attachment } = req.body;
+    const newTweet = new tweet_1.default({ content, userId, isComment, parentTweetID, attachment });
     yield newTweet.save();
     return res.status(201).json(newTweet);
 });
