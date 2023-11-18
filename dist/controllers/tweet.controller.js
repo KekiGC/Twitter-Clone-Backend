@@ -14,7 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTweetsByFilter = exports.getParentTweetAndComments = exports.editTweet = exports.getTweetsLikedByUser = exports.createTweetComment = exports.likeTweet = exports.getTweetById = exports.deleteTweet = exports.getTweetsByUser = exports.getTweets = exports.createTweet = void 0;
 const tweet_1 = __importDefault(require("../models/tweet"));
-const user_1 = __importDefault(require("../models/user"));
 const like_1 = __importDefault(require("../models/like"));
 // crear un tweet
 const createTweet = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -73,26 +72,29 @@ exports.deleteTweet = deleteTweet;
 const getTweetById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { tweetId } = req.params;
-        const tweet = yield tweet_1.default.findById(tweetId);
+        const tweet = yield tweet_1.default.findById(tweetId)
+            .populate('userId', 'username profileImg')
+            .exec();
         if (!tweet) {
             res.status(404).json({ message: 'Tweet not found' });
             return;
         }
-        const user = yield user_1.default.findById(tweet.userId);
-        if (!user) {
-            res.status(404).json({ message: 'User not found' });
-            return;
-        }
-        const tweetWithUserInfo = {
-            _id: tweet._id,
-            content: tweet.content,
-            user: {
-                _id: user._id,
-                username: user.username,
-                profileImg: user.profileImg,
-            }
-        };
-        res.json(tweetWithUserInfo);
+        // const user: IUser | null = await User.findById(tweet.userId);
+        // if (!user) {
+        //   res.status(404).json({ message: 'User not found' });
+        //   return;
+        // }
+        // const tweetWithUserInfo = {
+        //   _id: tweet._id,
+        //   content: tweet.content,
+        //   attachment: tweet.attachment,
+        //   user: {
+        //     _id: user._id,
+        //     username: user.username,
+        //     profileImg: user.profileImg,
+        //   }
+        // };
+        res.status(200).json(tweet);
     }
     catch (error) {
         console.error(error);
