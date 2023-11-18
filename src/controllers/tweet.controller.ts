@@ -32,7 +32,8 @@ export const getTweetsByUser = async (req: Request, res: Response) => {
     const { userId } = req.params;
 
     const tweets: ITweet[] = await Tweet.find({ userId })
-    .populate('userId', 'username handle profileImg');
+    .populate('userId', 'username handle profileImg')
+    .sort({ createdAt: -1 }).exec();
 
     res.status(200).json(tweets);
   } catch (error) {
