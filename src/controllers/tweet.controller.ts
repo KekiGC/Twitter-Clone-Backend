@@ -64,32 +64,35 @@ export const deleteTweet = async (req: Request, res: Response) => {
 export const getTweetById = async (req: Request, res: Response) => {
   try {
     const { tweetId } = req.params;
-
-    const tweet: ITweet | null = await Tweet.findById(tweetId);
-
+    
+    const tweet: ITweet | null = await Tweet.findById(tweetId)
+    .populate('userId', 'username profileImg')
+    .exec();
+    
     if (!tweet) {
       res.status(404).json({ message: 'Tweet not found' });
       return;
     }
+    
+    // const user: IUser | null = await User.findById(tweet.userId);
 
-    const user: IUser | null = await User.findById(tweet.userId);
+    // if (!user) {
+    //   res.status(404).json({ message: 'User not found' });
+    //   return;
+    // }
 
-    if (!user) {
-      res.status(404).json({ message: 'User not found' });
-      return;
-    }
+    // const tweetWithUserInfo = {
+    //   _id: tweet._id,
+    //   content: tweet.content,
+    //   attachment: tweet.attachment,
+    //   user: {
+    //     _id: user._id,
+    //     username: user.username,
+    //     profileImg: user.profileImg,
+    //   }
+    // };
 
-    const tweetWithUserInfo = {
-      _id: tweet._id,
-      content: tweet.content,
-      user: {
-        _id: user._id,
-        username: user.username,
-        profileImg: user.profileImg,
-      }
-    };
-
-    res.json(tweetWithUserInfo);
+    res.status(200).json(tweet);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error retrieving tweet' });
